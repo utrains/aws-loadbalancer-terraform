@@ -74,6 +74,7 @@ resource "aws_lb" "application-lb" {
 
   tags = {
     Environment = "application-lb"
+    Name        = "Application-lb"
     
   }
 }
