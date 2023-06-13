@@ -58,15 +58,16 @@ resource "aws_route" "internet-route" {
 # Create a security group
 resource "aws_security_group" "web-server" {
   name        = "allow_http_access"
-  description = "allow inbound http traffic"
+  description = "allow http traffic from alb"
   vpc_id      = aws_vpc.this.id
 
   ingress {
-    description = "from my ip range"
+    description = "traffic from alb"
     from_port   = "80"
     to_port     = "80"
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    security_groups = [aws_security_group.alb_sg.id]
+
   }
   egress {
     cidr_blocks = ["0.0.0.0/0"]
@@ -75,7 +76,7 @@ resource "aws_security_group" "web-server" {
     to_port     = "0"
   }
   tags = {
-    "Name" = "Application-lb-sg"
+    "Name" = "web-server-sg"
   }
 }
 

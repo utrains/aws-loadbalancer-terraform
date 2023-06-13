@@ -1,9 +1,34 @@
+# Create a security group for ALB
+resource "aws_security_group" "alb_sg" {
+  name        = "alb-security-group"
+  description = "Application load balancer security group"
+  vpc_id      = aws_vpc.this.id
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  egress {
+    cidr_blocks = ["0.0.0.0/0"]
+    from_port   = "0"
+    protocol    = "-1"
+    to_port     = "0"
+  }
+
+  tags = {
+    Name = "alb-security-group"
+  }
+}
+
 # Create a target group
 resource "aws_lb_target_group" "alb-target-group" {
   name     = "application-lb-tg"
   port     = 80
   protocol = "HTTP"
   vpc_id   = aws_vpc.this.id
+
   health_check {
     enabled             = true
     healthy_threshold   = 3
@@ -42,7 +67,7 @@ resource "aws_lb" "application-lb" {
   name               = "application-lb"
   internal           = false
   load_balancer_type = "application"
-  security_groups    = [aws_security_group.web-server.id]
+  security_groups    = [aws_security_group.alb_sg.id]
   subnets            = [for subnet in aws_subnet.private : subnet.id]
 
   enable_deletion_protection = false
