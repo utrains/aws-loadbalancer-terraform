@@ -80,27 +80,23 @@ resource "aws_security_group" "web-server" {
   }
 }
 
-# use data source to get a registered amazon linux 2 ami
-data "aws_ami" "amazon_linux_2" {
+# Latest Amazon Linux 2023 AMI
+data "aws_ami" "amazon_linux" {
   most_recent = true
-  owners      = ["amazon"]
-  
-  filter {
-    name   = "owner-alias"
-    values = ["amazon"]
-  }
 
   filter {
     name   = "name"
-    values = ["amzn2-ami-hvm*"]
+    values = ["al2023-ami-*-x86_64"]
   }
+
+  owners = ["137112412989"] # Amazon account ID
 }
 
 # launch 2 EC2 instances and install apache 
 resource "aws_instance" "web-server" {
   count                  = length(var.subnet_cidr_private)
   instance_type          = "t2.micro"
-  ami                    = data.aws_ami.amazon_linux_2.id
+  ami                    = data.aws_ami.amazon_linux.id
   vpc_security_group_ids = [aws_security_group.web-server.id]
   subnet_id              = element(aws_subnet.private.*.id, count.index)
   user_data              = file("install_httpd.sh")
